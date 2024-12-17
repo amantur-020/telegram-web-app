@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Entry Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin: auto;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"], input[type="number"], input[type="date"], select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        input[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h2>Form for Data Entry</h2>
+    <form action="#" method="post">
+        <label for="agency_contract_number">Agency Contract Number:</label>
+        <input type="text" id="agency_contract_number" name="Agency_Contract_number" required>
+
+        <label for="agency_agreement_date">Agency Agreement Date:</label>
+        <input type="date" id="agency_agreement_date" name="Agency_agreement_date" required>
+
+        <label for="agency_appendix_number">Agency Appendix Number:</label>
+        <input type="text" id="agency_appendix_number" name="Agency_appendix_number">
+
+        <label for="agency_date">Agency Date:</label>
+        <input type="date" id="agency_date" name="Agency_date">
+
+        <label for="client_company">Client Company:</label>
+        <input type="text" id="client_company" name="Client_company" required>
+
+        <label for="client_account_number">Client Company Account Number:</label>
+        <input type="text" id="client_account_number" name="Client_company_account_number">
+
+        <label for="client_address">Client Company Address:</label>
+        <input type="text" id="client_address" name="Client_company_adress">
+
+        <label for="client_bank">Client Company Bank:</label>
+        <input type="text" id="client_bank" name="Client_company_bank">
+
+        <label for="client_director">Client Company Director:</label>
+        <input type="text" id="client_director" name="Client_company_director">
+
+        <label for="closed_company">Closed Company:</label>
+        <input type="text" id="closed_company" name="Closed_company">
+
+        <label for="closed_company_director">Closed Company Director:</label>
+        <input type="text" id="closed_company_director" name="Closed_company_director">
+
+        <label for="commission_sum">Commission Transfer Sum:</label>
+        <input type="number" id="commission_sum" name="Comission_Transfer_Sum" step="0.01">
+
+        <label for="main_contract_number">Main US Client Contract Number:</label>
+        <input type="text" id="main_contract_number" name="Main_Us_Client_Contract_number">
+
+        <label for="main_client_date">Main US Client Date:</label>
+        <input type="date" id="main_client_date" name="Main_Us_Client_date">
+
+        <label for="pk_sum">PK Sum:</label>
+        <input type="number" id="pk_sum" name="PK_Sum" step="0.01">
+
+        <label for="pk_date">PK Date:</label>
+        <input type="date" id="pk_date" name="PK__Date">
+
+        <label for="pk_number">PK Number:</label>
+        <input type="text" id="pk_number" name="PK__Number">
+
+        <label for="transfer_sum">Transfer Sum:</label>
+        <input type="number" id="transfer_sum" name="Transfer_Sum" step="0.01">
+
+        <label for="akt_date">AKT PP Date:</label>
+        <input type="date" id="akt_date" name="akt__pp_date">
+
+        <label for="currency">Currency:</label>
+        <input type="text" id="currency" name="currency">
+
+        <label for="total_sum">Total Sum:</label>
+        <input type="number" id="total_sum" name="total_sum" step="0.01">
+
+        <input type="submit" value="Submit">
+    </form>
+</body>
+</html>
