@@ -126,6 +126,8 @@
     <script>
         const tg = window.Telegram.WebApp;
 
+        tg.ready();
+
         const urlParams = new URLSearchParams(window.location.search);
         const companyName = urlParams.get("company_name") || "Default Company";
         document.getElementById('company_name').value = companyName;
