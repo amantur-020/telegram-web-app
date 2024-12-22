@@ -119,27 +119,28 @@
         <label for="total_sum">Total Sum:</label>
         <input type="number" id="total_sum" name="total_sum" step="0.01">
 
-        <button type="button" id="submit-button">Submit</button>
+        <input type="submit" value="Submit">
     </form>
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
         let tg = window.Telegram.WebApp;
-    
+
         let urlParams = new URLSearchParams(window.location.search);
         let companyName = urlParams.get("company_name") || "Default Company";
         document.getElementById('company_name').value = companyName;
-    
-        document.getElementById('submit-button').addEventListener('click', function () {
-            let form = document.getElementById('data-form');
-            let formData = new FormData(form);
+
+        document.getElementById('data-form').addEventListener('submit', function (e) {
+            e.preventDefault(); 
+
+            let formData = new FormData(e.target);
             let data = {};
             formData.forEach((value, key) => {
                 data[key] = value;
             });
-    
+
             tg.sendData(JSON.stringify(data));
-    
+
             tg.close();
         });
     </script>
