@@ -178,21 +178,21 @@
         </table>
         <div class="button-container">
             <button type="button" class="add-row" onclick="addRow()">Добавить строку</button>
-            <button type="button" class="submit-btn" onclick="sendData()">Отправить</button>
+            <button type="submit" class="submit-btn">Отправить</button>
         </div>
     </form>
 
     <script>
         // Получаем название компании из URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const companyName = urlParams.get('company_name');
+        let urlParams = new URLSearchParams(window.location.search);
+        let companyName = urlParams.get('company_name');
         document.getElementById('companyName').textContent = companyName || 'Не указано';
 
         // Добавление новой строки
         function addRow() {
-            const table = document.getElementById("dataTable").getElementsByTagName('tbody')[0];
-            const newRow = table.insertRow(table.rows.length);
-            const fields = [
+            let table = document.getElementById("dataTable").getElementsByTagName('tbody')[0];
+            let newRow = table.insertRow(table.rows.length);
+            let fields = [
                 'agreement', 'agreement_date', 'buyer_company_ru', 'buyer_company_en', 'buyer_address_ru', 'buyer_address_en',
                 'buyer_director', 'buyer_account', 'buyer_bank', 'buyer_country', 'contract_number', 'contract_date',
                 'seller_company', 'seller_address', 'seller_director', 'seller_country', 'tnved_code', 'invoice_amount',
@@ -201,24 +201,24 @@
             ];
 
             fields.forEach((field, index) => {
-                const cell = newRow.insertCell();
+                let cell = newRow.insertCell();
                 if (field.includes("signature")) {
-                    const container = document.createElement("div");
+                    let container = document.createElement("div");
                     container.className = "file-input-container";
 
-                    const label = document.createElement("label");
+                    let label = document.createElement("label");
                     label.className = "file-input-label";
                     label.textContent = "Выбрать файл";
                     label.htmlFor = `${field}_${table.rows.length - 1}`;
 
-                    const input = document.createElement("input");
+                    let input = document.createElement("input");
                     input.type = "file";
                     input.id = `${field}_${table.rows.length - 1}`;
                     input.name = `${field}[]`;
                     input.accept = "image/*";
                     input.onchange = function() { updateFileName(this); };
 
-                    const fileName = document.createElement("div");
+                    let fileName = document.createElement("div");
                     fileName.className = "file-name";
                     fileName.id = `${field}_${table.rows.length - 1}_name`;
 
@@ -227,7 +227,7 @@
                     container.appendChild(fileName);
                     cell.appendChild(container);
                 } else {
-                    const input = document.createElement("input");
+                    let input = document.createElement("input");
                     input.type = field.includes("date") ? "date" : field.includes("amount") ? "number" : "text";
                     input.name = `${field}[]`;
                     cell.appendChild(input);
@@ -235,8 +235,8 @@
             });
 
             // Добавляем кнопку удаления для новой строки
-            const actionCell = newRow.insertCell();
-            const removeButton = document.createElement("button");
+            let actionCell = newRow.insertCell();
+            let removeButton = document.createElement("button");
             removeButton.type = "button";
             removeButton.className = "remove-row";
             removeButton.textContent = "Удалить";
@@ -246,7 +246,7 @@
 
         // Удаление строки
         function removeRow(button) {
-            const row = button.closest("tr");
+            let row = button.closest("tr");
             if (row && row.rowIndex > 1) { // Нельзя удалить первую строку
                 row.remove();
             }
@@ -254,7 +254,7 @@
 
         // Обновление имени файла
         function updateFileName(input) {
-            const fileNameDisplay = document.getElementById(`${input.id}_name`);
+            let fileNameDisplay = document.getElementById(`${input.id}_name`);
             if (input.files.length > 0) {
                 fileNameDisplay.textContent = input.files[0].name;
             } else {
@@ -262,27 +262,19 @@
             }
         }
 
-        // Преобразование файла в base64
-        function getBase64(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = error => reject(error);
-            });
-        }
+        // Обработка отправки формы
+        document.getElementById('dataForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
 
-        // Отправка данных в бот
-        async function sendData() {
-            const rows = document.querySelectorAll("#dataTable tbody tr");
-            const data = [];
+            let rows = document.querySelectorAll("#dataTable tbody tr");
+            let data = [];
 
-            for (const row of rows) {
-                const inputs = row.querySelectorAll("input");
-                const rowData = {};
+            for (let row of rows) {
+                let inputs = row.querySelectorAll("input");
+                let rowData = {};
 
-                for (const input of inputs) {
-                    const fieldName = input.name.replace("[]", "");
+                for (let input of inputs) {
+                    let fieldName = input.name.replace("[]", "");
                     if (input.type === "file" && input.files[0]) {
                         rowData[fieldName] = await getBase64(input.files[0]);
                     } else {
@@ -294,15 +286,30 @@
             }
 
             // Добавляем название компании в данные
-            const payload = {
+            let payload = {
                 company_name: companyName,
                 data: data
             };
-            let tg = window.Telegram.WebApp;
 
             // Отправка данных в Telegram Web App
-            tg.sendData(JSON.stringify(payload));
-            tg.close();
+            if (window.Telegram && window.Telegram.WebApp) {
+                let tg = window.Telegram.WebApp;
+                tg.sendData(JSON.stringify(payload));
+                tg.close();
+            } else {
+                console.error("Telegram Web App не инициализирован.");
+                alert("Ошибка: Telegram Web App не инициализирован.");
+            }
+        });
+
+        // Преобразование файла в base64
+        function getBase64(file) {
+            return new Promise((resolve, reject) => {
+                let reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
         }
     </script>
 </body>
