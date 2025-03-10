@@ -64,6 +64,15 @@
         }
     </style>
 </head>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const tg = window.Telegram.WebApp;
+        tg.expand();  // Раскрываем WebApp на полный экран
+        tg.MainButton.text = "Отправить данные"; // Опционально: изменяем текст кнопки
+        tg.MainButton.show(); // Показываем основную кнопку бота
+    });
+</script>
 <body>
     <h1>Заполнение данных для компании: <span id="companyName"></span></h1>
     <form id="dataForm">
