@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Telegram Web App</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -61,6 +62,38 @@
         .button-container {
             text-align: center;
             margin-top: 20px;
+        }
+        .file-input-container {
+            position: relative;
+            overflow: hidden;
+        }
+        .file-input-container input[type="file"] {
+            position: absolute;
+            top: 0;
+            right: 0;
+            margin: 0;
+            padding: 0;
+            font-size: 20px;
+            cursor: pointer;
+            opacity: 0;
+            filter: alpha(opacity=0);
+        }
+        .file-input-label {
+            display: block;
+            padding: 8px;
+            background-color: #f8f9fa;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            text-align: center;
+            cursor: pointer;
+        }
+        .file-input-label:hover {
+            background-color: #e9ecef;
+        }
+        .file-name {
+            margin-top: 5px;
+            font-size: 12px;
+            color: #28a745;
         }
     </style>
 </head>
@@ -125,8 +158,20 @@
                     <td><input type="date" name="income_date[]"></td>
                     <td><input type="text" name="income_number[]"></td>
                     <td><input type="date" name="loading_date[]"></td>
-                    <td><input type="file" name="buyer_signature[]" accept="image/*"></td>
-                    <td><input type="file" name="seller_signature[]" accept="image/*"></td>
+                    <td>
+                        <div class="file-input-container">
+                            <label class="file-input-label" for="buyer_signature_0">Выбрать файл</label>
+                            <input type="file" id="buyer_signature_0" name="buyer_signature[]" accept="image/*" onchange="updateFileName(this)">
+                            <div class="file-name" id="buyer_signature_0_name"></div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="file-input-container">
+                            <label class="file-input-label" for="seller_signature_0">Выбрать файл</label>
+                            <input type="file" id="seller_signature_0" name="seller_signature[]" accept="image/*" onchange="updateFileName(this)">
+                            <div class="file-name" id="seller_signature_0_name"></div>
+                        </div>
+                    </td>
                     <td><button type="button" class="remove-row" onclick="removeRow(this)" disabled>Удалить</button></td>
                 </tr>
             </tbody>
@@ -155,14 +200,32 @@
                 'buyer_signature', 'seller_signature'
             ];
 
-            fields.forEach(field => {
+            fields.forEach((field, index) => {
                 const cell = newRow.insertCell();
                 if (field.includes("signature")) {
+                    const container = document.createElement("div");
+                    container.className = "file-input-container";
+
+                    const label = document.createElement("label");
+                    label.className = "file-input-label";
+                    label.textContent = "Выбрать файл";
+                    label.htmlFor = `${field}_${table.rows.length - 1}`;
+
                     const input = document.createElement("input");
                     input.type = "file";
+                    input.id = `${field}_${table.rows.length - 1}`;
                     input.name = `${field}[]`;
                     input.accept = "image/*";
-                    cell.appendChild(input);
+                    input.onchange = function() { updateFileName(this); };
+
+                    const fileName = document.createElement("div");
+                    fileName.className = "file-name";
+                    fileName.id = `${field}_${table.rows.length - 1}_name`;
+
+                    container.appendChild(label);
+                    container.appendChild(input);
+                    container.appendChild(fileName);
+                    cell.appendChild(container);
                 } else {
                     const input = document.createElement("input");
                     input.type = field.includes("date") ? "date" : field.includes("amount") ? "number" : "text";
@@ -186,6 +249,16 @@
             const row = button.closest("tr");
             if (row && row.rowIndex > 1) { // Нельзя удалить первую строку
                 row.remove();
+            }
+        }
+
+        // Обновление имени файла
+        function updateFileName(input) {
+            const fileNameDisplay = document.getElementById(`${input.id}_name`);
+            if (input.files.length > 0) {
+                fileNameDisplay.textContent = input.files[0].name;
+            } else {
+                fileNameDisplay.textContent = "";
             }
         }
 
