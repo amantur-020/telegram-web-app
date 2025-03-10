@@ -262,10 +262,30 @@
             }
         }
 
+        // Преобразование файла в base64
+        function getBase64(file) {
+            return new Promise((resolve, reject) => {
+                let reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        }
+
         // Обработка отправки формы
         document.getElementById('dataForm').addEventListener('submit', async function (e) {
             e.preventDefault();
 
+            // Проверяем, инициализирован ли Telegram Web App
+            if (!window.Telegram || !window.Telegram.WebApp) {
+                console.error("Telegram Web App не инициализирован.");
+                alert("Ошибка: Telegram Web App не инициализирован.");
+                return;
+            }
+
+            let tg = window.Telegram.WebApp;
+
+            // Собираем данные из формы
             let rows = document.querySelectorAll("#dataTable tbody tr");
             let data = [];
 
@@ -276,7 +296,12 @@
                 for (let input of inputs) {
                     let fieldName = input.name.replace("[]", "");
                     if (input.type === "file" && input.files[0]) {
-                        rowData[fieldName] = await getBase64(input.files[0]);
+                        try {
+                            rowData[fieldName] = await getBase64(input.files[0]);
+                        } catch (error) {
+                            console.error("Ошибка при обработке файла:", error);
+                            rowData[fieldName] = null;
+                        }
                     } else {
                         rowData[fieldName] = input.value;
                     }
@@ -291,26 +316,15 @@
                 data: data
             };
 
-            // Отправка данных в Telegram Web App
-            if (window.Telegram && window.Telegram.WebApp) {
-                let tg = window.Telegram.WebApp;
-                tg.sendData(JSON.stringify(payload));
-                tg.close();
-            } else {
-                console.error("Telegram Web App не инициализирован.");
-                alert("Ошибка: Telegram Web App не инициализирован.");
-            }
-        });
+            // Отладка: выводим данные в консоль
+            console.log("Данные для отправки:", payload);
 
-        // Преобразование файла в base64
-        function getBase64(file) {
-            return new Promise((resolve, reject) => {
-                let reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = error => reject(error);
-            });
-        }
+            // Отправка данных в Telegram Web App
+            tg.sendData(JSON.stringify(payload));
+
+            // Закрываем Web App
+            tg.close();
+        });
     </script>
 </body>
 </html>
