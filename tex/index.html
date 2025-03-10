@@ -10,10 +10,6 @@
             background-color: #f4f4f9;
             margin: 0;
             padding: 20px;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
         }
         h1 {
             color: #333;
@@ -142,13 +138,6 @@
     </form>
 
     <script>
-        window.onload = function() {
-            if (window.Telegram && window.Telegram.WebApp) {
-                Telegram.WebApp.expand();  // Разворачивает Web App на весь экран
-                Telegram.WebApp.ready();   // Убедитесь, что приложение готово
-            }
-        };
-
         // Получаем название компании из URL
         const urlParams = new URLSearchParams(window.location.search);
         const companyName = urlParams.get('company_name');
