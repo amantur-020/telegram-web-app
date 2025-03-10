@@ -32,7 +32,7 @@
             background-color: #f8f9fa;
             font-weight: bold;
         }
-        input[type="text"], input[type="date"], input[type="number"], input[type="file"] {
+        input[type="text"], input[type="date"], input[type="number"], input[type="url"] {
             width: 100%;
             padding: 8px;
             box-sizing: border-box;
@@ -62,38 +62,6 @@
         .button-container {
             text-align: center;
             margin-top: 20px;
-        }
-        .file-input-container {
-            position: relative;
-            overflow: hidden;
-        }
-        .file-input-container input[type="file"] {
-            position: absolute;
-            top: 0;
-            right: 0;
-            margin: 0;
-            padding: 0;
-            font-size: 20px;
-            cursor: pointer;
-            opacity: 0;
-            filter: alpha(opacity=0);
-        }
-        .file-input-label {
-            display: block;
-            padding: 8px;
-            background-color: #f8f9fa;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            text-align: center;
-            cursor: pointer;
-        }
-        .file-input-label:hover {
-            background-color: #e9ecef;
-        }
-        .file-name {
-            margin-top: 5px;
-            font-size: 12px;
-            color: #28a745;
         }
     </style>
 </head>
@@ -127,8 +95,8 @@
                     <th>Дата Прихода</th>
                     <th>Номер приходника</th>
                     <th>Дата погрузки</th>
-                    <th>Печать/Подпись покупателя</th>
-                    <th>Печать/Подпись продавца</th>
+                    <th>Печать/Подпись покупателя (ссылка)</th>
+                    <th>Печать/Подпись продавца (ссылка)</th>
                     <th>Действия</th>
                 </tr>
             </thead>
@@ -158,20 +126,8 @@
                     <td><input type="date" name="income_date[]" required></td>
                     <td><input type="text" name="income_number[]" required></td>
                     <td><input type="date" name="loading_date[]" required></td>
-                    <td>
-                        <div class="file-input-container">
-                            <label class="file-input-label" for="buyer_signature_0">Выбрать файл</label>
-                            <input type="file" id="buyer_signature_0" name="buyer_signature[]" accept="image/*" onchange="updateFileName(this)" required>
-                            <div class="file-name" id="buyer_signature_0_name"></div>
-                        </div>
-                    </td>
-                    <td>
-                        <div class="file-input-container">
-                            <label class="file-input-label" for="seller_signature_0">Выбрать файл</label>
-                            <input type="file" id="seller_signature_0" name="seller_signature[]" accept="image/*" onchange="updateFileName(this)" required>
-                            <div class="file-name" id="seller_signature_0_name"></div>
-                        </div>
-                    </td>
+                    <td><input type="url" name="buyer_signature[]" required></td>
+                    <td><input type="url" name="seller_signature[]" required></td>
                     <td><button type="button" class="remove-row" onclick="removeRow(this)" disabled>Удалить</button></td>
                 </tr>
             </tbody>
@@ -202,38 +158,19 @@
 
             fields.forEach((field, index) => {
                 let cell = newRow.insertCell();
-                if (field.includes("signature")) {
-                    let container = document.createElement("div");
-                    container.className = "file-input-container";
-
-                    let label = document.createElement("label");
-                    label.className = "file-input-label";
-                    label.textContent = "Выбрать файл";
-                    label.htmlFor = `${field}_${table.rows.length - 1}`;
-
-                    let input = document.createElement("input");
-                    input.type = "file";
-                    input.id = `${field}_${table.rows.length - 1}`;
-                    input.name = `${field}[]`;
-                    input.accept = "image/*";
-                    input.onchange = function() { updateFileName(this); };
-                    input.required = true;
-
-                    let fileName = document.createElement("div");
-                    fileName.className = "file-name";
-                    fileName.id = `${field}_${table.rows.length - 1}_name`;
-
-                    container.appendChild(label);
-                    container.appendChild(input);
-                    container.appendChild(fileName);
-                    cell.appendChild(container);
+                let input = document.createElement("input");
+                if (field.includes("date")) {
+                    input.type = "date";
+                } else if (field.includes("amount")) {
+                    input.type = "number";
+                } else if (field.includes("signature")) {
+                    input.type = "url";
                 } else {
-                    let input = document.createElement("input");
-                    input.type = field.includes("date") ? "date" : field.includes("amount") ? "number" : "text";
-                    input.name = `${field}[]`;
-                    input.required = true;
-                    cell.appendChild(input);
+                    input.type = "text";
                 }
+                input.name = `${field}[]`;
+                input.required = true;
+                cell.appendChild(input);
             });
 
             // Добавляем кнопку удаления для новой строки
@@ -254,28 +191,8 @@
             }
         }
 
-        // Обновление имени файла
-        function updateFileName(input) {
-            let fileNameDisplay = document.getElementById(`${input.id}_name`);
-            if (input.files.length > 0) {
-                fileNameDisplay.textContent = input.files[0].name;
-            } else {
-                fileNameDisplay.textContent = "";
-            }
-        }
-
-        // Преобразование файла в base64
-        function getBase64(file) {
-            return new Promise((resolve, reject) => {
-                let reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = error => reject(error);
-            });
-        }
-
         // Обработка отправки формы
-        document.getElementById('dataForm').addEventListener('submit', async function (e) {
+        document.getElementById('dataForm').addEventListener('submit', function (e) {
             e.preventDefault();
 
             // Проверяем, инициализирован ли Telegram Web App
@@ -297,20 +214,11 @@
 
                 for (let input of inputs) {
                     let fieldName = input.name.replace("[]", "");
-                    if (input.type === "file" && input.files[0]) {
-                        try {
-                            rowData[fieldName] = await getBase64(input.files[0]);
-                        } catch (error) {
-                            console.error("Ошибка при обработке файла:", error);
-                            rowData[fieldName] = null;
-                        }
-                    } else {
-                        if (!input.value.trim()) {
-                            alert("Пожалуйста, заполните все поля.");
-                            return;
-                        }
-                        rowData[fieldName] = input.value;
+                    if (!input.value.trim()) {
+                        alert("Пожалуйста, заполните все поля.");
+                        return;
                     }
+                    rowData[fieldName] = input.value;
                 }
 
                 data.push(rowData);
