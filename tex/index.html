@@ -225,9 +225,11 @@
                 company_name: companyName,
                 data: data
             };
+            let tg = window.Telegram.WebApp;
 
             // Отправка данных в Telegram Web App
-            Telegram.WebApp.sendData(JSON.stringify(payload));
+            tg.sendData(JSON.stringify(payload));
+            tg.close();
         }
     </script>
 </body>
