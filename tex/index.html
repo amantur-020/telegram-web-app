@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram Web App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        input[type="text"], input[type="date"], input[type="number"], input[type="file"] {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .add-row, .remove-row, .submit-btn {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .add-row {
+            background-color: #28a745;
+            color: white;
+        }
+        .remove-row {
+            background-color: #dc3545;
+            color: white;
+        }
+        .submit-btn {
+            background-color: #007bff;
+            color: white;
+        }
+        .button-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Заполнение данных для компании: <span id="companyName"></span></h1>
+    <form id="dataForm">
+        <table id="dataTable">
+            <thead>
+                <tr>
+                    <th>Агентский договор</th>
+                    <th>Дата агентского номера</th>
+                    <th>Компания покупателя (ru)</th>
+                    <th>Компания покупателя (en)</th>
+                    <th>Адрес компании покупателя (ru)</th>
+                    <th>Адрес компании покупателя (en)</th>
+                    <th>Директор покупателя</th>
+                    <th>Расчетный счет компании покупателя</th>
+                    <th>Банк покупателя</th>
+                    <th>Страна покупателя</th>
+                    <th>Номер исходящего контракта</th>
+                    <th>Дата исходящего контракта</th>
+                    <th>Компания Продавца</th>
+                    <th>Адрес Продавца</th>
+                    <th>Директор Компании Продавца</th>
+                    <th>Страна Продавца</th>
+                    <th>Код ТНВЭД товара</th>
+                    <th>Сумма инвойса</th>
+                    <th>Валюта</th>
+                    <th>Сумма прихода</th>
+                    <th>Сумма прихода (строка)</th>
+                    <th>Дата Прихода</th>
+                    <th>Номер приходника</th>
+                    <th>Дата погрузки</th>
+                    <th>Печать/Подпись покупателя</th>
+                    <th>Печать/Подпись продавца</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><input type="text" name="agreement[]"></td>
+                    <td><input type="date" name="agreement_date[]"></td>
+                    <td><input type="text" name="buyer_company_ru[]"></td>
+                    <td><input type="text" name="buyer_company_en[]"></td>
+                    <td><input type="text" name="buyer_address_ru[]"></td>
+                    <td><input type="text" name="buyer_address_en[]"></td>
+                    <td><input type="text" name="buyer_director[]"></td>
+                    <td><input type="text" name="buyer_account[]"></td>
+                    <td><input type="text" name="buyer_bank[]"></td>
+                    <td><input type="text" name="buyer_country[]"></td>
+                    <td><input type="text" name="contract_number[]"></td>
+                    <td><input type="date" name="contract_date[]"></td>
+                    <td><input type="text" name="seller_company[]"></td>
+                    <td><input type="text" name="seller_address[]"></td>
+                    <td><input type="text" name="seller_director[]"></td>
+                    <td><input type="text" name="seller_country[]"></td>
+                    <td><input type="text" name="tnved_code[]"></td>
+                    <td><input type="number" name="invoice_amount[]"></td>
+                    <td><input type="text" name="currency[]"></td>
+                    <td><input type="number" name="income_amount[]"></td>
+                    <td><input type="text" name="income_amount_str[]"></td>
+                    <td><input type="date" name="income_date[]"></td>
+                    <td><input type="text" name="income_number[]"></td>
+                    <td><input type="date" name="loading_date[]"></td>
+                    <td><input type="file" name="buyer_signature[]" accept="image/*"></td>
+                    <td><input type="file" name="seller_signature[]" accept="image/*"></td>
+                    <td><button type="button" class="remove-row" onclick="removeRow(this)" disabled>Удалить</button></td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="button-container">
+            <button type="button" class="add-row" onclick="addRow()">Добавить строку</button>
+            <button type="button" class="submit-btn" onclick="sendData()">Отправить</button>
+        </div>
+    </form>
+
+    <script>
+        // Получаем название компании из URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const companyName = urlParams.get('company_name');
+        document.getElementById('companyName').textContent = companyName || 'Не указано';
+
+        // Добавление новой строки
+        function addRow() {
+            const table = document.getElementById("dataTable").getElementsByTagName('tbody')[0];
+            const newRow = table.insertRow(table.rows.length);
+            const fields = [
+                'agreement', 'agreement_date', 'buyer_company_ru', 'buyer_company_en', 'buyer_address_ru', 'buyer_address_en',
+                'buyer_director', 'buyer_account', 'buyer_bank', 'buyer_country', 'contract_number', 'contract_date',
+                'seller_company', 'seller_address', 'seller_director', 'seller_country', 'tnved_code', 'invoice_amount',
+                'currency', 'income_amount', 'income_amount_str', 'income_date', 'income_number', 'loading_date',
+                'buyer_signature', 'seller_signature'
+            ];
+
+            fields.forEach(field => {
+                const cell = newRow.insertCell();
+                if (field.includes("signature")) {
+                    const input = document.createElement("input");
+                    input.type = "file";
+                    input.name = `${field}[]`;
+                    input.accept = "image/*";
+                    cell.appendChild(input);
+                } else {
+                    const input = document.createElement("input");
+                    input.type = field.includes("date") ? "date" : field.includes("amount") ? "number" : "text";
+                    input.name = `${field}[]`;
+                    cell.appendChild(input);
+                }
+            });
+
+            // Добавляем кнопку удаления для новой строки
+            const actionCell = newRow.insertCell();
+            const removeButton = document.createElement("button");
+            removeButton.type = "button";
+            removeButton.className = "remove-row";
+            removeButton.textContent = "Удалить";
+            removeButton.onclick = function() { removeRow(this); };
+            actionCell.appendChild(removeButton);
+        }
+
+        // Удаление строки
+        function removeRow(button) {
+            const row = button.closest("tr");
+            if (row && row.rowIndex > 1) { // Нельзя удалить первую строку
+                row.remove();
+            }
+        }
+
+        // Преобразование файла в base64
+        function getBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        // Отправка данных в бот
+        async function sendData() {
+            const rows = document.querySelectorAll("#dataTable tbody tr");
+            const data = [];
+
+            for (const row of rows) {
+                const inputs = row.querySelectorAll("input");
+                const rowData = {};
+
+                for (const input of inputs) {
+                    const fieldName = input.name.replace("[]", "");
+                    if (input.type === "file" && input.files[0]) {
+                        rowData[fieldName] = await getBase64(input.files[0]);
+                    } else {
+                        rowData[fieldName] = input.value;
+                    }
+                }
+
+                data.push(rowData);
+            }
+
+            // Добавляем название компании в данные
+            const payload = {
+                company_name: companyName,
+                data: data
+            };
+
+            // Отправка данных в Telegram Web App
+            Telegram.WebApp.sendData(JSON.stringify(payload));
+        }
+    </script>
+</body>
+</html>
